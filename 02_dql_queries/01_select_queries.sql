@@ -1,4 +1,8 @@
-USE sql10am;
+/*
+    Here all the queries use 'SELECT' clause to display the result table.
+*/
+USE sql10am;    -- to use the sql10am database
+
 -- 1. NAME AND COMM OF EMP
 SELECT ENAME,COMM
 FROM EMP;
