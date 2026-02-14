@@ -83,5 +83,6 @@ WHERE e.HIREDATE < adams.HIREDATE        -- Before Adams
   AND d.LOC NOT LIKE '%P%'               -- No 'P' in Location
   AND e.SAL > ward_mgr.SAL;              -- More than Ward's Manager
 
--- add
+
+
 
