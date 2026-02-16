@@ -92,3 +92,103 @@ LEFT JOIN Company c
 ON e.company_code = c.company_code
 GROUP BY e.company_code, c.founder
 ORDER BY e.company_code;
+
+/*
+===============================================================================
+Scenario 1: Employee Table Contains All Hierarchy Codes
+===============================================================================
+
+If the Employee table already contains:
+- lead_manager_code
+- senior_manager_code
+- manager_code
+- employee_code
+- company_code
+
+Then we DO NOT need to join hierarchy tables separately.
+All hierarchy levels can be counted directly from Employee.
+
+Reason:
+The hierarchy is already flattened inside the Employee table.
+Using additional joins may cause row multiplication and complexity.
+
+===============================================================================
+Query (Minimal & Efficient Approach)
+===============================================================================
+*/
+
+SELECT 
+    e.company_code,
+    c.founder,
+    COUNT(DISTINCT e.lead_manager_code)    AS total_lead_mgr,
+    COUNT(DISTINCT e.senior_manager_code)  AS total_senior_mgr,
+    COUNT(DISTINCT e.manager_code)         AS total_mgr,
+    COUNT(DISTINCT e.employee_code)        AS total_emp
+FROM Employee e
+JOIN Company c 
+    ON e.company_code = c.company_code
+GROUP BY e.company_code, c.founder
+ORDER BY e.company_code;
+
+
+
+/*
+===============================================================================
+Scenario 2: Employee Table Contains ONLY Employee Details
+===============================================================================
+
+If the Employee table only contains:
+- employee_code
+- manager_code
+- company_code
+
+And hierarchy is normalized across tables:
+
+Company
+  → Lead_Manager
+      → Senior_Manager
+          → Manager
+              → Employee
+
+Then we MUST join all hierarchy tables.
+
+Important:
+Joins will create row multiplication due to one-to-many relationships.
+Therefore, COUNT(DISTINCT ...) is mandatory to avoid overcounting.
+
+===============================================================================
+Query (Normalized Hierarchy Approach)
+===============================================================================
+*/
+
+SELECT 
+    c.company_code,
+    c.founder,
+    COUNT(DISTINCT lm.lead_manager_code)     AS total_lead_mgr,
+    COUNT(DISTINCT sm.senior_manager_code)   AS total_senior_mgr,
+    COUNT(DISTINCT m.manager_code)           AS total_mgr,
+    COUNT(DISTINCT e.employee_code)          AS total_emp
+FROM Company c
+LEFT JOIN Lead_Manager lm 
+       ON c.company_code = lm.company_code
+LEFT JOIN Senior_Manager sm 
+       ON lm.lead_manager_code = sm.lead_manager_code
+LEFT JOIN Manager m 
+       ON sm.senior_manager_code = m.senior_manager_code
+LEFT JOIN Employee e 
+       ON m.manager_code = e.manager_code
+GROUP BY c.company_code, c.founder
+ORDER BY c.company_code;
+
+/*
+===============================================================================
+Key Interview Insight
+===============================================================================
+
+• If hierarchy keys are denormalized (flattened) → Use only Employee table.
+• If hierarchy is normalized → Join hierarchically.
+• Always use COUNT(DISTINCT ...) to prevent overcounting caused by joins.
+• Sorting is lexicographical because company_code is a string.
+
+===============================================================================
+*/
