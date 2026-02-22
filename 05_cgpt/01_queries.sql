@@ -49,3 +49,21 @@ select order_date,
 	daily_sales,
 	sum(daily_sales) over (order by order_date) running_total
 from a;
+
+-- Q14: Find duplicate email IDs in users table.
+SELECT 
+    email,
+    COUNT(*) AS occurrence_count
+FROM users
+GROUP BY email
+HAVING COUNT(*) > 1;
+
+Table: website_visits
+| user_id | visit_date | converted (1/0) |
+
+-- Q15: Calculate daily conversion rate.
+select visit_date,
+	avg(converted) conversion_rate
+from website_visits
+group by visit_date;
+
