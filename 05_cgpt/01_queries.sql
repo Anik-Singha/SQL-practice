@@ -28,3 +28,24 @@ WHERE YEAR(transaction_date) = 2024
   AND MONTH(transaction_date) IN (1,2)
 GROUP BY c.customer_id, c.name
 HAVING COUNT(DISTINCT MONTH(transaction_date)) = 2;
+
+-- Q12: Get top 3 highest revenue-generating customers.
+select name,
+	sum(amount) as revenue
+from customers c join orders o
+on c.customer_id = o.customer_id
+group by name
+order by revenue desc
+limit 3;
+
+-- Q13: Calculate running total of daily sales.
+with a as(
+select order_date,
+	sum(amount) daily_sales
+from orders
+group by order_date
+)
+select order_date,
+	daily_sales,
+	sum(daily_sales) over (order by order_date) running_total
+from a;
