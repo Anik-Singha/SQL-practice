@@ -46,3 +46,39 @@ on d.department_id = o.department_id
 where o.order_date >= date_sub(curdate(),interval 11 month)
 group by d.department_name
 order by total_orders desc;
+
+-- ✅ 2️⃣ Rolling 12 Months in MySQL (Window Function)
+
+SELECT 
+    d.department_name,
+    o.order_date,
+    SUM(o.order_amount) OVER (
+        PARTITION BY d.department_name
+        ORDER BY o.order_date
+        RANGE BETWEEN INTERVAL '11' MONTH PRECEDING 
+        AND CURRENT ROW
+    ) AS rolling_12m_total
+FROM departments d
+JOIN orders o
+  ON d.department_id = o.department_id;
+
+-- MYSQL
+WITH monthly_sales AS (
+    SELECT 
+        d.department_name,
+        DATE_FORMAT(o.order_date, '%Y-%m-01') AS month_start,
+        SUM(o.order_amount) AS monthly_total
+    FROM departments d
+    JOIN orders o
+        ON d.department_id = o.department_id
+    GROUP BY d.department_name, month_start
+)
+SELECT 
+    department_name,
+    month_start,
+    SUM(monthly_total) OVER (
+        PARTITION BY department_name
+        ORDER BY month_start
+        ROWS BETWEEN 11 PRECEDING AND CURRENT ROW
+    ) AS rolling_12m_total
+FROM monthly_sales;
