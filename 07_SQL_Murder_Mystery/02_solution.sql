@@ -299,7 +299,21 @@ WHERE f.event_name = 'SQL Symphony Concert'
 GROUP BY f.event_name
 HAVING COUNT(f.event_name) = 3;
 
-
+-- Using Joins
+SELECT p.name
+FROM person p
+JOIN drivers_license d
+ON p.license_id = d.id
+JOIN facebook_event_checkin f
+ON p.id = f.person_id
+WHERE d.gender = 'female'
+AND d.hair_color = 'red'
+AND d.height BETWEEN 65 AND 67
+AND d.car_make = 'Tesla'
+AND d.car_model = 'Model S'
+AND f.event_name = 'SQL Symphony Concert'
+GROUP BY p.name
+HAVING COUNT(*) = 3;
 
 /* ============================================================
    FINAL RESULT
@@ -312,3 +326,31 @@ Mastermind behind the crime:
 Miranda Priestly
 
 ============================================================ */
+
+
+/*
+SHORTER CTE more polished
+
+WITH d_details AS (
+    SELECT id
+    FROM drivers_license
+    WHERE car_make = 'Tesla'
+      AND car_model = 'Model S'
+      AND height BETWEEN 65 AND 67
+      AND hair_color = 'red'
+),
+p_details AS (
+    SELECT p.id, p.name
+    FROM d_details d
+    JOIN person p
+    ON d.id = p.license_id
+)
+
+SELECT pp.name
+FROM p_details pp
+JOIN facebook_event_checkin f
+ON pp.id = f.person_id
+WHERE f.event_name = 'SQL Symphony Concert'
+GROUP BY pp.name
+HAVING COUNT(*) = 3;
+*/
