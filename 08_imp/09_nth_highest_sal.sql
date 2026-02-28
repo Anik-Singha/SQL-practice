@@ -56,7 +56,7 @@ CREATE FUNCTION getNthHighestSalary(N INT) RETURNS INT
 BEGIN
   RETURN (
       # Write your MySQL query statement below.
-        select salary
+        select max(salary)
         from (select salary,
                 dense_rank() over(order by salary desc) sal_rank
         from Employee) as a
